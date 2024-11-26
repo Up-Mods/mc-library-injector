@@ -1,4 +1,5 @@
 [versions]
+jetbrains_annotations = "26.0.1"
 jna = "5.15.0"
 slf4j_api = "2.0.16"
 
@@ -7,6 +8,7 @@ fabric_loader = "0.16.9"
 junit = "5.10.3"
 
 [libraries]
+jetbrains_annotations = { module = "org.jetbrains:annotations", version.ref = "jetbrains_annotations" }
 jna = { module = "net.java.dev.jna:jna", version.ref = "jna" }
 slf4j_api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j_api" }
 

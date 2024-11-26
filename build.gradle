@@ -16,10 +16,6 @@ subprojects {
     project.group = rootProject.group
     project.version = rootProject.version
 
-    base {
-        archivesName.set(rootProject.name)
-    }
-
     repositories {
         mavenCentral()
         maven {
@@ -28,10 +24,18 @@ subprojects {
         }
     }
 
+    dependencies {
+        compileOnly libs.jetbrains.annotations
+    }
+
     java {
         toolchain {
             languageVersion = JavaLanguageVersion.of(targetJavaVersion)
         }
+    }
+
+    base {
+        archivesName.set(rootProject.name)
     }
 
     jar {
