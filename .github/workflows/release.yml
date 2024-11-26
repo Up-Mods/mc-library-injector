@@ -50,5 +50,4 @@ jobs:
           version: ${{ env.TAG }}
           version-type: beta
           files: |
-            api/build/libs/*.jar
-            lib/build/libs/*.jar
+            build/libs/*.jar

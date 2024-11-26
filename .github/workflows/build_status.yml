@@ -44,5 +44,4 @@ jobs:
         with:
           name: ${{ github.event.repository.name }}-${{ github.sha }}
           path: |
-            api/build/libs/*.jar
-            lib/build/libs/*.jar
+            build/libs/*.jar

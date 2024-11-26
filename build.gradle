@@ -1,4 +1,5 @@
 plugins {
+    id 'java-library'
     id 'maven-publish'
 }
 
@@ -7,8 +8,8 @@ def targetJavaVersion = 17
 group = "dev.upcraft.mc-library-injector"
 
 def ENV = System.getenv()
-def buildTime = ENV.BUILD_TIME ?: new Date().format('yy.MMdd.HHmm');
-version = ENV.TAG?: "${ENV.CI ? 'ci' : 'local'}-${buildTime}"
+def buildTime = ENV.BUILD_TIME ?: new Date().format('yy.MMdd.HHmm')
+version = ENV.TAG ?: "${ENV.CI ? 'ci' : 'local'}-${buildTime}"
 
 subprojects {
     apply plugin: 'java-library'
@@ -49,4 +50,20 @@ subprojects {
             }
         }
     }
+}
+
+tasks.register("copyToRoot", Copy) {
+    description = 'Copies the JAR and sources JAR files to the root build directory.'
+    group "build"
+
+    ['api', 'lib'].each { subproject ->
+        from { project(":${subproject}").tasks.named('jar', org.gradle.jvm.tasks.Jar) }
+        from { project(":${subproject}").tasks.named('sourcesJar', org.gradle.jvm.tasks.Jar) }
+        into rootProject.layout.buildDirectory.dir('libs')
+    }
+}
+
+tasks.assemble.dependsOn(tasks.copyToRoot)
+tasks.named('jar').configure {
+    it.enabled = false
 }
