@@ -1,0 +1,48 @@
+plugins {
+    id 'maven-publish'
+}
+
+def targetJavaVersion = 17
+
+group = "dev.upcraft.mc-library-injector"
+
+def ENV = System.getenv()
+def buildTime = ENV.BUILD_TIME ?: new Date().format('yy.MMdd.HHmm');
+version = ENV.TAG?: "${ENV.CI ? 'ci' : 'local'}-${buildTime}"
+
+subprojects {
+    apply plugin: 'java-library'
+    apply plugin: 'maven-publish'
+    project.group = rootProject.group
+    project.version = rootProject.version
+
+    base {
+        archivesName.set(rootProject.name)
+    }
+
+    repositories {
+        mavenCentral()
+        maven {
+            name = 'FabricMC'
+            url = 'https://maven.fabricmc.net'
+        }
+    }
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+        }
+    }
+
+    jar {
+        from { rootProject.file("LICENSE.md") }
+    }
+
+    publishing {
+        repositories {
+            maven {
+                url = rootProject.layout.buildDirectory.dir("repo")
+            }
+        }
+    }
+}

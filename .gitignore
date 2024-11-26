@@ -1,0 +1,31 @@
+# Gradle
+.gradle/
+build/
+/out/
+/classes/
+
+# Log file
+*.log
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+replay_pid*
+
+# Eclipse
+*.launch
+
+# JetBrains IDEs
+/.idea/
+*.iml
+*.ipr
+*.iws
+
+# Visual Studio Code
+/.settings/
+/.vscode/
+/bin/
+/.classpath/
+/.project/
+
+# macOS
+*.DS_Store

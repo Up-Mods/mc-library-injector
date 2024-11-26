@@ -1,0 +1,48 @@
+name: Build Status
+
+on:
+  push:
+    branches: [ '*' ]
+  pull_request:
+
+jobs:
+  init:
+    runs-on: ubuntu-latest
+    outputs:
+      REPOSITORY_NAME: ${{ steps.setup.outputs.REPOSITORY_NAME }}
+      BUILD_TIME: ${{ steps.setup.outputs.BUILD_TIME }}
+    steps:
+      - name: Setup Environment
+        id: setup
+        run: |
+          echo "REPOSITORY_NAME=${GITHUB_REPOSITORY#$GITHUB_REPOSITORY_OWNER/}" >> $GITHUB_OUTPUT
+          echo BUILD_TIME=$(date '+%y.%m%d.%H%M') >> $GITHUB_OUTPUT
+
+  build:
+    env:
+      JAVA_VERSION: 21
+      BUILD_TIME: ${{ needs.init.outputs.BUILD_TIME }}
+      BUILD_NUMBER: ${{ github.run_number }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'microsoft'
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'gradle'
+      - name: Validate Gradle Wrapper
+        uses: gradle/actions/wrapper-validation@v4
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+      - name: Build with Gradle
+        run: ./gradlew build --rerun-tasks
+      - name: Upload build artifacts
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.event.repository.name }}-${{ github.sha }}
+          path: |
+            api/build/libs/*.jar
+            lib/build/libs/*.jar

@@ -1,0 +1,52 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+
+dependencies {
+    implementation project(':shared')
+    implementation libs.slf4j.api
+    implementation libs.jna
+    implementation libs.fabric.loader
+}
+
+testing {
+    suites {
+        test {
+            useJUnitJupiter(libs.versions.junit.get())
+        }
+    }
+}
+
+java {
+    withSourcesJar()
+}
+
+jar {
+    from {
+        project(':shared').sourceSets.main.output
+    }
+    manifest {
+        attributes([
+                'Specification-Title'   : rootProject.name,
+                'Specification-Version' : rootProject.version,
+                'Implementation-Title'  : rootProject.name,
+                'Maven-Artifact'        : "${project.group}:${rootProject.name}:${project.version}",
+                'Implementation-Version': project.version,
+                'Built-On-Java'         : "${System.getProperty('java.vm.version')} (${System.getProperty('java.vm.vendor')})",
+        ])
+    }
+}
+
+sourcesJar {
+    from { rootProject.file("LICENSE.md") }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifactId = rootProject.name
+        }
+    }
+}
