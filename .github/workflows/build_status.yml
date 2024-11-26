@@ -19,6 +19,8 @@ jobs:
           echo BUILD_TIME=$(date '+%y.%m%d.%H%M') >> $GITHUB_OUTPUT
 
   build:
+    needs:
+      - init
     env:
       JAVA_VERSION: 21
       BUILD_TIME: ${{ needs.init.outputs.BUILD_TIME }}

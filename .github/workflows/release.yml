@@ -18,6 +18,8 @@ jobs:
           echo BUILD_TIME=$(date '+%y.%m%d.%H%M') >> $GITHUB_OUTPUT
 
   publish:
+    needs:
+      - init
     env:
       JAVA_VERSION: 21
       TAG: ${{ github.ref_name }}
