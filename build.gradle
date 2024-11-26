@@ -45,8 +45,14 @@ subprojects {
 
     publishing {
         repositories {
-            maven {
-                url = rootProject.layout.buildDirectory.dir("repo")
+            if (ENV.MAVEN_UPLOAD_URL) {
+                maven {
+                    url = ENV.MAVEN_UPLOAD_URL
+                    credentials {
+                        username = ENV.MAVEN_UPLOAD_USERNAME
+                        password = ENV.MAVEN_UPLOAD_PASSWORD
+                    }
+                }
             }
         }
     }
