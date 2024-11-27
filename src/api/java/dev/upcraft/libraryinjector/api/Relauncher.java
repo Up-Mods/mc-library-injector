@@ -7,9 +7,13 @@ import java.nio.file.Path;
 import java.util.function.BooleanSupplier;
 
 @ApiStatus.Experimental
-public interface Relauncher {
+public final class Relauncher {
 
-    static void relaunch(boolean load, BooleanSupplier abortGetter, Path... jars) {
+    private Relauncher() {
+        throw new UnsupportedOperationException();
+    }
+
+    public static void relaunch(boolean load, BooleanSupplier abortGetter, Path... jars) {
         MinecraftFabricRelauncher.relaunch(load, abortGetter, jars);
     }
 }
