@@ -5,71 +5,122 @@ plugins {
 
 def targetJavaVersion = 17
 
-group = "dev.upcraft.mc-library-injector"
+group = "dev.upcraft"
+base {
+    archivesName.set("mc-library-injector")
+}
 
 def ENV = System.getenv()
 def buildTime = ENV.BUILD_TIME ?: new Date().format('yy.MMdd.HHmm')
 version = ENV.TAG ?: "${ENV.CI ? 'ci' : 'local'}-${buildTime}"
 
-subprojects {
-    apply plugin: 'java-library'
-    apply plugin: 'maven-publish'
-    project.group = rootProject.group
-    project.version = rootProject.version
+sourceSets {
+    shared
+    api {
+        compileClasspath += shared.output
+        runtimeClasspath += shared.output
+        compileClasspath += main.output
+        runtimeClasspath += main.output
+    }
+    main {
+        compileClasspath += shared.output
+        runtimeClasspath += shared.output
+    }
+}
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+    }
+    registerFeature('api') {
+        usingSourceSet sourceSets.api
+        withSourcesJar()
+        withJavadocJar()
+    }
+    withSourcesJar()
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        name = 'FabricMC'
+        url = 'https://maven.fabricmc.net'
+    }
+}
+
+dependencies {
+    apiCompileOnly libs.jetbrains.annotations
+    compileOnly libs.jetbrains.annotations
+    sharedCompileOnly libs.jetbrains.annotations
+    implementation libs.slf4j.api
+    implementation libs.jna
+    implementation libs.fabric.loader
+}
+
+jar {
+    from {
+        file("LICENSE.md")
+        sourceSets.shared.output
+        sourceSets.api.output
+    }
+
+    manifest {
+        attributes([
+                'Specification-Title'   : rootProject.name,
+                'Specification-Version' : rootProject.version,
+                'Implementation-Title'  : rootProject.name,
+                'Maven-Artifact'        : "${project.group}:${rootProject.name}:${project.version}",
+                'Implementation-Version': project.version,
+                'Built-On-Java'         : "${System.getProperty('java.vm.version')} (${System.getProperty('java.vm.vendor')})",
+        ])
+    }
+}
+
+apiJar {
+    from {
+        file("LICENSE.md")
+        sourceSets.shared.output
+    }
+
+    manifest {
+        attributes([
+                'Specification-Title'   : rootProject.name,
+                'Specification-Version' : rootProject.version,
+                'Implementation-Title'  : rootProject.name,
+                'Maven-Artifact'        : "${project.group}:${rootProject.name}:${project.version}:api",
+                'Implementation-Version': project.version,
+                'Built-On-Java'         : "${System.getProperty('java.vm.version')} (${System.getProperty('java.vm.vendor')})",
+        ])
+    }
+}
+
+testing {
+    suites {
+        test {
+            useJUnitJupiter(libs.versions.junit.get())
+        }
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
     repositories {
-        mavenCentral()
-        maven {
-            name = 'FabricMC'
-            url = 'https://maven.fabricmc.net'
-        }
-    }
-
-    dependencies {
-        compileOnly libs.jetbrains.annotations
-    }
-
-    java {
-        toolchain {
-            languageVersion = JavaLanguageVersion.of(targetJavaVersion)
-        }
-    }
-
-    base {
-        archivesName.set(rootProject.name)
-    }
-
-    jar {
-        from { rootProject.file("LICENSE.md") }
-    }
-
-    publishing {
-        repositories {
-            if (ENV.MAVEN_UPLOAD_URL) {
-                maven {
-                    url = ENV.MAVEN_UPLOAD_URL
-                    credentials {
-                        username = ENV.MAVEN_UPLOAD_USERNAME
-                        password = ENV.MAVEN_UPLOAD_PASSWORD
-                    }
+        if (ENV.MAVEN_UPLOAD_URL) {
+            maven {
+                url = ENV.MAVEN_UPLOAD_URL
+                credentials {
+                    username = ENV.MAVEN_UPLOAD_USERNAME
+                    password = ENV.MAVEN_UPLOAD_PASSWORD
                 }
             }
         }
+        maven {
+            name = "test"
+            url = project.layout.buildDirectory.dir('repo')
+        }
     }
-}
-
-tasks.register("copyToRoot", Copy) {
-    description = 'Copies the JAR and sources JAR files to the root build directory.'
-    group "build"
-
-    ['api', 'lib'].each { subproject ->
-        from { project(":${subproject}").tasks.named('jar', org.gradle.jvm.tasks.Jar) }
-        from { project(":${subproject}").tasks.named('sourcesJar', org.gradle.jvm.tasks.Jar) }
-        into rootProject.layout.buildDirectory.dir('libs')
-    }
-}
-
-tasks.assemble.dependsOn(tasks.copyToRoot)
-tasks.named('jar').configure {
-    it.enabled = false
 }

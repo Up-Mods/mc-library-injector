@@ -1,7 +1,0 @@
-plugins {
-    id 'java-library'
-}
-
-tasks.named('jar').configure {
-    it.enabled = false
-}
