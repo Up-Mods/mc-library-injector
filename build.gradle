@@ -118,9 +118,5 @@ publishing {
                 }
             }
         }
-        maven {
-            name = "test"
-            url = project.layout.buildDirectory.dir('repo')
-        }
     }
 }
