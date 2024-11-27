@@ -57,12 +57,14 @@ dependencies {
     implementation libs.fabric.loader
 }
 
+artifacts {
+    archives apiJar
+}
+
 jar {
-    from {
-        file("LICENSE.md")
-        sourceSets.shared.output
-        sourceSets.api.output
-    }
+    from file("LICENSE.md")
+    from sourceSets.api.output
+    from sourceSets.shared.output
 
     manifest {
         attributes([
@@ -77,10 +79,8 @@ jar {
 }
 
 apiJar {
-    from {
-        file("LICENSE.md")
-        sourceSets.shared.output
-    }
+    from file("LICENSE.md")
+    from sourceSets.shared.output
 
     manifest {
         attributes([
